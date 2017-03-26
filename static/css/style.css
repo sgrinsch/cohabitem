@@ -1,0 +1,57 @@
+body { margin:0; padding:0; }
+
+
+
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
+/*#map { position: absolute; top:0; bottom:0; right:0; left:0; }*/
+
+#map, #map2 {
+width: 100%;
+position: absolute;
+height: 800px;
+margin:0;
+padding:0; 
+/*border: 1px solid black;
+border-radius: 8px;*/
+}
+
+@media (max-width: 768px) { 
+	#map, #map2 {
+		width: 100%;
+		position: absolute;
+		height: 400px;
+		margin:0;
+		padding:0; 
+		/*border: 1px solid black;
+		border-radius: 8px;*/
+	}
+}
+
+
+
+.myform {
+	padding-top: 15px;
+	padding-left: 35px;
+}
+
+
+
+
+label {
+	padding-top: 10px;
+}
+
+
+
+/* http://bl.ocks.org/mourner/4284949 */
+
+.leaflet-marker-icon,
+    .leaflet-marker-shadow {
+      -webkit-transition: margin 0.2s;
+         -moz-transition: margin 0.2s;
+           -o-transition: margin 0.2s;
+              transition: margin 0.2s;
+    } 

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<!--Based on https://github.com/mjfoster83/web-map-workshop/blob/master/7_advancedMapping_CartoDB/index-completed.html-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+    <title>mappeig | cohabitem sarrià | Afegeix Adreces</title>
+    <meta name="description" content="">
+    
+
+    <!-- Favicon and Mobile Icons -->
+    <link rel="shortcut icon" href="../static/img/favicon.ico" > 
+   
+
+    <!-- Stylesheets --> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/esri-leaflet-geocoder@2.2.3/dist/esri-leaflet-geocoder.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@0.4.7/dist/leaflet.draw-src.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://domoritz.github.io/leaflet-locatecontrol/dist/L.Control.Locate.min.css" />
+
+    <link rel="stylesheet" href="../static/css/leaflet.awesome-markers.css?h=3c9c2140">
+    <link rel="stylesheet" href="../static/css/style.css?h=da27b8f3">
+
+  </head>
+  <body>
+  <div class="container">
+	<div class="jumbotron">
+		<h1>Cohabitem Sarrià</h1>
+		<p><small>Mappeig the pisos, cases i terrenys del barri per impulsar cessions d'ús i masoveria urbana</p>
+	</div>
+
+	<ul class="nav nav-tabs">
+  <li role="presentation" ><a href="../">Home</a></li>
+  <li role="presentation"  class="active" ><a href="../adreces/">Afegeix adreces</a></li>
+  <li role="presentation" ><a href="../dibuix/">Dibuixa al mapa de Sarrià</a></li>
+</ul>
+
+	
+<div class="row">
+	<div class="col-sm-5 col-xs-12">
+		<form class="form-horizontal myform">
+		  <h3>Formulari per afegir adreces</h3>
+		  <p>Escull una adreça  clicant al mapa o cercant amb el buscador. Només trobaràs adreces existents. Pots moure el marcador fins trobar l'adreça que busques. Afegeix informació i desa-la.</p>
+		  <div class="form-group">
+			<div class="row">
+			  <div class="col-xs-8">
+			    <label for="Address">Adreça 1</label>
+				<input type="text" class="form-control" id="Address" placeholder="Carrer, Plaça,..." readonly>
+			  </div>
+			  <div class="col-xs-4">
+				<label for="address2">Adreça 2</label>
+				<input type="text" class="form-control" id="address2" placeholder="Pis, escala, porteria">
+			  </div>
+			</div>
+			<div class="row">
+			  <div class="col-xs-4">
+			    <label for="Postal">Codi Postal</label>
+				<input type="number" class="form-control" id="Postal" placeholder="08034, 08017,..." readonly>
+			  </div>
+			  <div class="col-xs-4">
+				<label for="City">Ciutat</label>
+				<input type="text" class="form-control" id="City" placeholder="Barcelona" readonly>
+			  </div>
+			    <div class="col-xs-4">
+				<label for="Region" style="color:white">País</label>
+				<input type="text" class="form-control" id="Region" placeholder="Catalunya" readonly>
+			  </div>
+			</div>
+			<div class="row">
+			  <div class="col-xs-6">
+				<label for="lat">Latitud</label>
+		    	<input type="number" class="form-control input-sm" id="lat" placeholder="41.39" readonly>
+			  </div>
+			  <div class="col-xs-6">
+			    <label for="lon">Longitut</label>
+			    <input type="number" class="form-control input-sm" id="lon" placeholder="2.12" readonly>
+			  </div>
+			</div>
+			 <p class="help-block">Les àrees grises s'afegeixen automàticament del mapa</p>
+			<div class="row">
+			  <div class="col-xs-6">
+				<label for="type">Tipus</label>
+				<select class="form-control" id="type">
+				  <option>Pis</option>
+				  <option>Casa</option>
+				  <option>Edifici</option>
+				  <option>Solar</option>
+				</select>
+			  </div>
+			  <div class="col-xs-6">
+			    <label for="catastral">Referència Catastral</label>
+			    <input type="text" class="form-control" id="catastral" placeholder="ref catastral">
+			    <p class="help-block"><a href="https://www1.sedecatastro.gob.es/OVCFrames.aspx?TIPO=consulta" target="blank">Enllaç per cercar la referència catastral</a></p>
+			  </div>
+			</div>
+			<div class="row">
+			  <div class="col-xs-12">
+				<label for="comment">Comentaris</label>
+		    	<textarea class="form-control" id="comment" rows="3" placeholder="Tota la informació que puguis aportar"></textarea>
+			  </div>
+			  <div class="col-xs-6">
+			    <label for="name">Nom</label>
+	   			<input type="text" class="form-control" id="name" placeholder="El teu nom">
+			  </div>
+			  <div class="col-xs-6">
+				<label for="email">email</label>
+		    	<input type="email" class="form-control" id="email" placeholder="El teu email">
+			  </div>
+			</div>
+			<br>
+			<button type="submit" id="desa" class="btn btn-default">Desa</button>
+		   </div>
+		</form>
+	</div>
+	<div class="col-sm-7 col-xs-12">
+		<div id="map"></div>
+	</div>
+</div>
+
+
+
+      <div class="footer navbar-fixed-bottom">
+      <div class="container">
+        <p class="text-muted">Cohabitem Sarrià    |    <strong><a href="https://cohabitem.wordpress.com/">https://cohabitem.wordpress.com/</a></strong></p>
+
+      </div>
+    </div>
+
+   </div>
+   
+   
+<script src="../static/js/bundle1.js"></script>
+
+
+  </body>
+</html>
