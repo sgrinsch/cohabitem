@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<!--Based on https://github.com/mjfoster83/web-map-workshop/blob/master/7_advancedMapping_CartoDB/index-completed.html-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+    <title>mappeig | cohabitem sarrià | Emoji</title>
+    <meta name="description" content="">
+    
+
+    <!-- Favicon and Mobile Icons -->
+    <link rel="shortcut icon" href="../static/img/favicon.ico" > 
+   
+
+    <!-- Stylesheets --> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/esri-leaflet-geocoder@2.2.3/dist/esri-leaflet-geocoder.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@0.4.7/dist/leaflet.draw-src.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://domoritz.github.io/leaflet-locatecontrol/dist/L.Control.Locate.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-easybutton@2.0.0/src/easy-button.css">
+
+    <link rel="stylesheet" href="../static/css/leaflet.awesome-markers.css?h=3c9c2140">
+    <link rel="stylesheet" href="../static/css/style.css?h=2f1c91c1">
+
+  </head>
+  <body>
+  <div class="container">
+	<div class="jumbotron">
+		<h1>Cohabitem Sarrià</h1>
+		<p><small>Mappeig the pisos, cases i terrenys del barri per impulsar cessions d'ús i masoveria urbana</p>
+	</div>
+
+	<ul class="nav nav-tabs">
+  <li role="presentation" ><a href="../">Home</a></li>
+  <li role="presentation" ><a href="../adreces/">Afegeix adreces</a></li>
+  <li role="presentation" ><a href="../dibuix/">Dibuixa al mapa de Sarrià</a></li>
+  <li role="presentation"  class="active" ><a href="../emoji/">EmoticonaSarrià</a></li>
+</ul>
+
+	
+
+<div class="row">
+	<div class="col-sm-12 col-xs-12" style="padding-top: 20px">
+		<div class="col-md-4 col-sm-2 hidden-xs"></div>
+		<div class="col-md-1 col-sm-2 col-xs-3 emoji" id="menamora"><img src="../static/img/1f60d.svg" class="img-responsive hvr-grow"></div>
+		<div class="col-md-1 col-sm-2 col-xs-3 emoji" id="memprenya"><img src="../static/img/1f621.svg" class="img-responsive hvr-grow"></div>
+		<div class="col-md-1 col-sm-2 col-xs-3 emoji" id="nomhopuccreure"><img src="../static/img/1f631.svg" class="img-responsive hvr-grow"></div>
+		<div class="col-md-1 col-sm-2 col-xs-3 emoji" id="podriemmillorar"><img src="../static/img/1f914.svg" class="img-responsive hvr-grow"></div>
+		<div class="col-md-4 col-sm-2 hidden-xs"></div>
+		<br>
+	</div>
+	<div class="col-sm-12 col-xs-12" style="padding-top: 20px">
+		<div id="map"></div>
+	</div>
+</div>
+
+<div class="modal fade" id="menamora_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div class="row">
+	        <div class="col-xs-1"><img src="../static/img/1f60d.svg" width="25"></div>
+	        <div class="col-xs-6"><h4 class="modal-title">M'enamora...</h4></div>
+        </div>
+      </div>
+      <div class="modal-body">
+		<textarea class="form-control" id="comment_menamora" rows="5" placeholder="Digues què t'enamora i per què"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="menamora_a">Desa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="memprenya_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div class="row">
+	        <div class="col-xs-1"><img src="../static/img/1f621.svg" width="25"></div>
+	        <div class="col-xs-5"><h4 class="modal-title">M'emprenya...</h4></div>
+        </div>
+      </div>
+      <div class="modal-body">
+		<textarea class="form-control" id="comment" rows="5" placeholder="Digues què t'emprenya i per què"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="memprenya_a">Desa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="nomhopuccreure_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div class="row">
+	        <div class="col-xs-1"><img src="../static/img/1f631.svg" width="25"></div>
+	        <div class="col-xs-9"><h4 class="modal-title">No m'ho puc creure!</h4></div>
+        </div>
+      </div>
+      <div class="modal-body">
+		<textarea class="form-control" id="comment" rows="5" placeholder="Digues què no et pots creure i per què"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="nomhopuccreure_a">Desa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="podriemmillorar_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div class="row">
+	        <div class="col-xs-1"><img src="../static/img/1f914.svg" width="25"></div>
+	        <div class="col-xs-8"><h4 class="modal-title">Podríem millorar...</h4></div>
+        </div>
+      </div>
+      <div class="modal-body">
+		<textarea class="form-control" id="comment" rows="5" placeholder="Digues què podríem millorar i com"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="podriemmillorar_a">Desa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+   </div>
+
+   
+   
+   
+<script src="../static/js/bundle3.js"></script>
+
+
+  </body>
+</html>
