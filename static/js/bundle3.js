@@ -33,7 +33,9 @@ require('drmonty-leaflet-awesome-markers');
 var config = {
 	cartoDBusername : "sgrinschpun",
 	cartoDBinsertfunction : "insert_emoji_data",
+	cartoDBupdatefunction : "update_emoji_data",
 	cartoDBtablename : "emoticona",
+	cartoDBapikey: "ccf08eda5c1ee54b2f70735a568d5e358c84c54b",
 	mapcenter: [41.396904, 2.120389],
 	zoom: 15
 };
@@ -136,7 +138,7 @@ var cartoDBData = null;
 
 
 // Write SQL Selection Query to be Used on CartoDB Table
-var sqlQuery = "SELECT cartodb_id, the_geom, emoji, comment FROM " + config.cartoDBtablename;
+var sqlQuery = "SELECT cartodb_id, the_geom, emoji, comment, thumbsup, thumbsdown FROM " + config.cartoDBtablename;
 
 
 // Create Leaflet map object
@@ -224,12 +226,10 @@ var emojis = L.markerClusterGroup();
 
 function getGeoJSON(emoti=1) {
 	var getData2 = getData + " WHERE emoji=" + "'" + String(emoti)+ "'";
-
 	$.getJSON(getData2, function (data) {
 		var cartoDBData = L.geoJson(data, {
 
 				pointToLayer: function(feature, latlng) {
-					console.log(data);
 					if (feature.properties.emoji == '1'){
 	        		return new L.marker(latlng, {icon: menamora});
 	        		} else if (feature.properties.emoji == '2'){
@@ -243,25 +243,28 @@ function getGeoJSON(emoti=1) {
 				onEachFeature: function (feature, layer) {
 					
 					var cartodb_id= feature.properties.cartodb_id;
+
 					// Create an element to hold all your text and markup
 					var container = $('<div />');
 
 					// Delegate all event handling for the container itself and its contents to the container
 					container.on('click', '.thumbup', function() {
-					    console.log('update database thumbup')
+					    
+					    updateThumbsup(feature.properties.emoji, cartodb_id, feature.properties.thumbsup +1)
 					});
 
 					container.on('click', '.thumbdown', function() {
-					    console.log('update database thumbdown')
+					 
+					    updateThumbsdown(feature.properties.emoji, cartodb_id, feature.properties.thumbsdown +1)
 					});
 
 					// Insert whatever you want into the container, using whichever approach you prefer
 					container.html('<h5>Comentari:</h5>'+
 									'<h6>' + unescape(feature.properties.comment) + '</h6><br><br>'
 										+ '<img src="../static/img/1f44d.svg" class="img-responsive hvr-grow thumbup"  width="30">' 
-										+ unescape(feature.properties.emoji) + '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'
+										+ unescape(feature.properties.thumbsup) + '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'
 										+ '<img src="../static/img/1f44e.svg" class="img-responsive hvr-grow thumbdown" width="30">'
-										+ unescape(feature.properties.emoji));
+										+ unescape(feature.properties.thumbsdown));
 					layer.bindPopup(container[0],{ maxWidth : 200, minWidth: 200});
 
 				}
@@ -273,7 +276,7 @@ function getGeoJSON(emoti=1) {
 }
 
 
-
+//http://stackoverflow.com/questions/13698975/click-link-inside-leaflet-popup-and-do-javascript
 
 //getGeoJSON();
 
@@ -290,8 +293,8 @@ var marker_latlng;
 var searchControl = geocoding.geosearch({
 	position : 'topleft',
 	zoomToResult: true,
-	collapseAfterResult: false,
-	expanded: true,
+	collapseAfterResult: true,
+	expanded: false,
 	allowMultipleResults: false,
 	placeholder: 'Busca Adreces',
 	title: 'Cercador d\'Adreces'
@@ -376,25 +379,6 @@ $('.emoji').click(function (e) {
 	}    
 });
 
-map.on('popupopen', function() {  
-	$('img.thumbsup').click(function (e) {
-		console.log('fireup')
-	});
-
-	$('img.thumbsdown').click(function (e) {
-		console.log('firedown')
-	});
-
-});
-
-
-
-
-
-
-
-
-
 
 //*** Send data to Carto ****
 function setData(emoti, marker_latlng, comment) {
@@ -410,7 +394,7 @@ var the_geom = {"type":"Point","coordinates":[marker_latlng.lng,marker_latlng.la
 		sql += "," + "0";
 		sql += ");";
 
-		//console.log(sql);
+		console.log(sql);
 
 //Sending the data
 		$.ajax({
@@ -444,8 +428,76 @@ var the_geom = {"type":"Point","coordinates":[marker_latlng.lng,marker_latlng.la
 }
 
 
+//https://carto.com/blog/faster-data-updates-with-cartodb
 
-//////////bootstrap-table
+
+// https://{account}.cartodb.com/api/v2/sql?q=UPDATE test_table SET column_name = 'my new string value' WHERE cartodb_id = 1 &api_key={Your API key}
+// 'https://'+'config.cartoDBusername + '.cartodb.com/api/v2/sql?q=UPDATE'+ cartoDBtablename +  'SET thumbsup = _thumbsup WHERE cartodb_id = _cartodb_id &api_key=' + cartoDBapikey
+
+//*** Send data to Carto ****
+function updateThumbsup(emoti, _cartodb_id, _thumbsup) {
+var update_url = 'https://'+ config.cartoDBusername + '.cartodb.com/api/v2/sql?q=UPDATE '+ config.cartoDBtablename +  ' SET thumbsup =' + _thumbsup +' WHERE cartodb_id ='+ _cartodb_id+'&api_key=' + config.cartoDBapikey
+//Sending the data
+		$.ajax({
+			type: 'POST',
+			url: update_url,
+			crossDomain: true,
+			dataType: 'json',
+			success: function (responseData, textStatus, jqXHR) {
+				console.log("Data saved");
+					// refresh map
+				//console.log('https://' + config.cartoDBusername + '.cartodb.com/api/v2/'+ sql);
+				if (emojis) { // check
+					emojis.clearLayers(); // remove
+				}
+/*				if (results) { // check
+					results.clearLayers(); // remove
+				}*/
+				if (marker) { // check
+					marker.clearLayers();// remove
+				}
+
+				getGeoJSON(emoti);
+			},
+			error: function (responseData, textStatus, errorThrown) {
+
+				console.log("Problem saving the data");
+			}
+		});
+
+}
+
+function updateThumbsdown(emoti, _cartodb_id, _thumbsdown) {
+var update_url = 'https://'+ config.cartoDBusername + '.cartodb.com/api/v2/sql?q=UPDATE '+ config.cartoDBtablename +  ' SET thumbsdown =' + _thumbsdown +' WHERE cartodb_id ='+ _cartodb_id+'&api_key=' + config.cartoDBapikey
+//Sending the data
+		$.ajax({
+			type: 'POST',
+			url: update_url,
+			crossDomain: true,
+			dataType: 'json',
+			success: function (responseData, textStatus, jqXHR) {
+				console.log("Data saved");
+					// refresh map
+				//console.log('https://' + config.cartoDBusername + '.cartodb.com/api/v2/'+ sql);
+				if (emojis) { // check
+					emojis.clearLayers(); // remove
+				}
+/*				if (results) { // check
+					results.clearLayers(); // remove
+				}*/
+				if (marker) { // check
+					marker.clearLayers();// remove
+				}
+
+				getGeoJSON(emoti);
+			},
+			error: function (responseData, textStatus, errorThrown) {
+
+				console.log("Problem saving the data");
+			}
+		});
+
+}
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"bootstrap":2,"drmonty-leaflet-awesome-markers":15,"esri-leaflet":17,"esri-leaflet-geocoder":16,"jquery":18,"leaflet":22,"leaflet-easybutton":19,"leaflet.locatecontrol":20,"leaflet.markercluster":21}],2:[function(require,module,exports){
 // This file is autogenerated via the `commonjs` Grunt task. You can require() this file in a CommonJS environment.
